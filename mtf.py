@@ -2,8 +2,7 @@ class mtf:
 
     @staticmethod
     def encode(data: bytes) -> bytes:
-
-        # 初始化0-255的字节表
+        """Move-to-Front encoding for byte sequences"""
         symbols = list(range(256))
         result = bytearray()
 
@@ -17,7 +16,7 @@ class mtf:
 
     @staticmethod
     def decode(data: bytes) -> bytes:
-
+        """Move-to-Front decoding for byte sequences"""
         symbols = list(range(256))
         result = bytearray()
 
