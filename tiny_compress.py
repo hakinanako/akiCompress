@@ -1,7 +1,6 @@
-
 from mtf import mtf
 from rle import rle
-from bwt import bwt#  Assuming rle is another module you have
+from bwt import bwt  # Assuming rle is another module you have
 
 class tiny_compress:
     def __init__(self):
@@ -21,7 +20,6 @@ class tiny_compress:
     def log_bytes(self, data: bytes, description: str, original_size: int = None):
         self.logger.info(f"{description}: {data[:50]}{'...' if len(data) > 50 else ''} ({len(data)} bytes)")
 
-
     def compress(self, data: bytes) -> bytes:
         self.logger.info("\nCOMPRESSION PROCESS")
         self.logger.info("=" * 80)
@@ -37,6 +35,11 @@ class tiny_compress:
 
         rel_encoded = rle.encode(mtf_encoded)
         self.log_bytes(rel_encoded, "After RLE", original_size)
+
+        compressed_size = len(rel_encoded)
+        compression_ratio = compressed_size / original_size
+        self.logger.info(f"Compression ratio: {compression_ratio:.2f}")
+        print(f"Compression ratio: {compression_ratio:.2f}")  # Output to console
 
         return rel_encoded
 
@@ -57,14 +60,12 @@ class tiny_compress:
 
         return bwt_decoded
 
-
     def _test_single_case(self, data: bytes):
         self.logger.info("\nCOMPRESSION TEST")
         self.logger.info("=" * 80)
 
         compressed = self.compress(data)
         decompressed = self.decompress(compressed)
-
 
         self.logger.info("\nCOMPRESSION RESULTS")
         self.logger.info("=" * 80)
@@ -78,7 +79,7 @@ class tiny_compress:
         self.logger.info("Starting Compression Tests")
         self.logger.info("=" * 80)
 
-        data = b"banana"*100+b"apple"+b"banana"*100
+        data = b"banana"*100 + b"apple" + b"banana"*100
         self._test_single_case(data)
 
         self.logger.info("All tests passed!")

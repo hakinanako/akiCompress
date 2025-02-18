@@ -1,6 +1,5 @@
 import os
 import sys
-from zlib import decompress
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 from rich.console import Console
@@ -49,10 +48,9 @@ def compress():
     compressor = tiny_compress()
 
     # Call the compress method
-    compressed_data, index = compressor.compress(input_str)
+    compressed_data = compressor.compress(input_str)
 
     console.print(f"\n压缩结果: {compressed_data}", style="bold cyan")
-    console.print(f"\n索引: {index}", style="bold cyan")
 
 @app.command()
 def decompress():
