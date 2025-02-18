@@ -1,64 +1,33 @@
-class bwt:
-    @staticmethod
-    def encode(s: bytes) -> (bytes, int):
-        """对字节流进行BWT编码"""
-        if not s:
-            return b"", 0
+from sais import sais
 
-        n = len(s)
-        # 构建旋转矩阵
-        matrix = []
-        for i in range(n):
-            rotation = s[i:] + s[:i]
-            matrix.append((rotation, i))
+END = b'\x01'  # Use byte representation of 0x01 (must not appear in original string)
 
-        # 按字典序排序
-        matrix.sort(key=lambda x: x[0])
+def bwt(s: bytes) -> bytes:
+    """Perform Burrows-Wheeler Transform on byte sequence using SAIS"""
+    s = s + END
+    sa = sais(s)
+    sa = sa[1:]  # Remove the first element which is the position of the end marker
+    bwt_result = bytearray()
+    for pos in sa:
+        if pos == 0:
+            bwt_result.append(s[-1])
+        else:
+            bwt_result.append(s[pos - 1])
+    return bytes(bwt_result)
 
-        # 构建BWT结果和查找原始位置
-        bwt = bytearray()
-        for rot, _ in matrix:
-            bwt.append(rot[-1])
+def ibwt(r: bytes) -> bytes:
+    n = len(r)
+    table = [b''] * n
+    for _ in range(n):
+        table = sorted([r[i:i+1] + table[i] for i in range(n)])
+    s = [row for row in table if row.endswith(END)][0]
+    return s.rstrip(END)
 
-        # 找到原始字符串的位置
-        for i, (rot, orig_pos) in enumerate(matrix):
-            if orig_pos == 0:
-                return bytes(bwt), i
+def test_bwt():
+    s = b'banana_apple_banana'
+    r = bwt(s)
+    assert ibwt(r) == s
 
-        return bytes(bwt), 0
-
-    @staticmethod
-    def decode(encoded: bytes, index: int) -> bytes:
-        """从BWT编码恢复原始字节流"""
-        if not encoded:
-            return b""
-
-        n = len(encoded)
-
-        # 构建F列（第一列）
-        f_col = sorted(encoded)
-
-        # 构建L列到F列的映射
-        rank = {}
-        count = {}
-        for i, c in enumerate(encoded):
-            count[c] = count.get(c, 0)
-            rank[i] = count[c]
-            count[c] += 1
-
-        # 构建F列中每个字符的起始位置
-        first = {}
-        curr_pos = 0
-        for c in sorted(count.keys()):
-            first[c] = curr_pos
-            curr_pos += count[c]
-
-        # 重建原始字符串
-        result = bytearray()
-        pos = index
-        for _ in range(n):
-            c = encoded[pos]
-            result.append(c)
-            pos = first[c] + rank[pos]
-
-        return bytes(reversed(result))
+if __name__ == '__main__':
+    test_bwt()
+    print('bwt test passed')

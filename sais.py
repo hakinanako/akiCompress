@@ -1,23 +1,19 @@
 from collections import Counter
 
-
-# SA-IS 算法 (时间复杂度 O(nlogn))
-# s: 输入字符串
-def sais(s):
-    # 获取字符串中所有唯一字符并排序
-    uniq = list(set(s))
+def sais(bytes_seq):
+    uniq = list(set(bytes_seq))
     uniq.sort()
-    # 将字符串转换为数字列表，每个字符映射到一个唯一的数字
-    return sais_rec(list(map({e: i + 1 for i, e in enumerate(uniq)}.__getitem__, s)), len(uniq))
+    # 将字节流转换为数字列表，每个字节映射到一个唯一的数字
+    return sais_rec(list(map({e: i + 1 for i, e in enumerate(uniq)}.__getitem__, bytes_seq)), len(uniq))
 
 
 def sais_rec(lst, num):
     L = len(lst)
-    # 如果字符串长度小于2，直接返回结果
+    # 如果字节流长度小于2，直接返回结果
     if L < 2:
         return lst + [0]
 
-    # 在字符串末尾添加结束符0
+    # 在字节流末尾添加结束符0
     lst = lst + [0]
     L += 1
     res = [-1] * L
@@ -33,12 +29,12 @@ def sais_rec(lst, num):
     LMS = [i for i in range(1, L) if t[i - 1] < t[i]]
     LMSn = len(LMS)
 
-    # 统计每个字符出现的次数
+    # 统计每个字节出现的次数
     count = Counter(lst)
     tmp = 0
     cstart = [0] * (num + 1)
     cend = [0] * (num + 1)
-    # 计算每个字符的起始和结束位置
+    # 计算每个字节的起始和结束位置
     for key in range(num + 1):
         cstart[key] = tmp
         cend[key] = tmp = tmp + count[key]
@@ -61,18 +57,18 @@ def sais_rec(lst, num):
             res[next(ce_it[lst[e - 1]])] = e - 1
 
     # 为 LMS 子串命名
-    name = 0;
+    name = 0
     prev = -1
     pLMS = {}
     for e in res:
         if isLMS[e]:
             if prev == -1 or lst[e] != lst[prev]:
-                name += 1;
+                name += 1
                 prev = e
             else:
                 for i in range(1, L):
                     if lst[e + i] != lst[prev + i]:
-                        name += 1;
+                        name += 1
                         prev = e
                         break
                     if isLMS[e + i] or isLMS[prev + i]:
@@ -108,38 +104,32 @@ def sais_rec(lst, num):
     return res
 
 
-# 最长公共前缀 (Longest Common Prefix)
-# 参数：(字符串s, 字符串长度n, 后缀数组sa)
-def LCP(s, n, sa):
+# LCP
+def LCP(bytes_seq, n, sa):
     lcp = [-1] * (n + 1)
     rank = [0] * (n + 1)
-    # 计算每个后缀的排名
     for i in range(n + 1):
         rank[sa[i]] = i
 
     h = 0
     lcp[0] = 0
-    # 计算相邻后缀的最长公共前缀
     for i in range(n):
         j = sa[rank[i] - 1]
         if h > 0:
             h -= 1
-        while j + h < n and i + h < n and s[j + h] == s[i + h]:
+        while j + h < n and i + h < n and bytes_seq[j + h] == bytes_seq[i + h]:
             h += 1
         lcp[rank[i] - 1] = h
     return lcp
 
 
-# 测试代码
 if __name__ == "__main__":
-    # 测试字符串
-    s = "banana"
-    n = len(s)
+    # 处理字节流
+    bytes_seq = b"banana"
+    n = len(bytes_seq)
 
-    # 调用 SA-IS 算法生成后缀数组
-    sa = sais(s)
+    sa = sais(bytes_seq)
     print("后缀数组:", sa)
 
-    # 调用 LCP 函数计算最长公共前缀数组
-    lcp = LCP(s, n, sa)
+    lcp = LCP(bytes_seq, n, sa)
     print("最长公共前缀数组:", lcp)

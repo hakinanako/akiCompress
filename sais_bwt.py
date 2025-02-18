@@ -8,8 +8,8 @@ class sais_bwt:
         if not s:
             return b"", 0
 
-        # 调用sais算法生成后缀数组
-        sa = sais(s)  # 256 for byte values
+        # 后缀数组
+        sa = sais(s)  # 256
         sa = sa[1:]
         print(f"Suffix Array: {sa}")
 
@@ -27,14 +27,10 @@ class sais_bwt:
 
     @staticmethod
     def decode(encoded: bytes, index: int) -> bytes:
-        """从BWT编码恢复原始字节流"""
         if not encoded:
             return b""
 
         n = len(encoded)
-
-        # 构建F列（第一列）
-        f_col = sorted(encoded)
 
         # 构建L列到F列的映射
         rank = {}
@@ -51,7 +47,7 @@ class sais_bwt:
             first[c] = curr_pos
             curr_pos += count[c]
 
-        # 重建原始字符串
+        # 还原
         result = bytearray()
         pos = index
         for _ in range(n):
@@ -61,3 +57,21 @@ class sais_bwt:
 
         return bytes(reversed(result))
 
+
+# 测试
+def test_sais_bwt():
+    test_cases = [
+        b"banana"*10+b"apple"+b"banana"*10,
+
+    ]
+
+    for s in test_cases:
+        encoded, index = sais_bwt.encode(s)
+        print(f"Encoded: {encoded}, Index: {index}")
+        decoded = sais_bwt.decode(encoded, index)
+        print(f"Decoded: {decoded}")
+        assert s == decoded, f"Test failed for input: {s}"
+        print("BWT test passed.")
+
+if __name__ == '__main__':
+    test_sais_bwt()
