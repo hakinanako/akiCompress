@@ -22,7 +22,9 @@ def sais_rec(lst, num):
 
     # 计算类型数组 t，t[i] 表示第 i 个位置是 L 型还是 S 型
     for i in range(L - 2, -1, -1):
-        t[i] = 1 if (lst[i] < lst[i + 1] or (lst[i] == lst[i + 1] and t[i + 1])) else 0
+        t[i] = 1 if (lst[i] < lst[i + 1]
+                     or (lst[i] == lst[i + 1]
+                         and t[i + 1])) else 0
 
     # 判断是否是 LMS 子串
     isLMS = [t[i - 1] < t[i] for i in range(L)]
