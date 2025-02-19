@@ -8,6 +8,7 @@ def sais(bytes_seq):
 
 
 def sais_rec(lst, num):
+
     L = len(lst)
     # 如果字节流长度小于2，直接返回结果
     if L < 2:

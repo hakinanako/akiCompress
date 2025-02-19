@@ -1,5 +1,3 @@
-
-
 from mtf import mtf
 from rle import rle
 from bwt import bwt  # Assuming rle is another module you have
