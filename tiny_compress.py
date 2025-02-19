@@ -1,6 +1,7 @@
 from mtf import mtf
 from rle import rle
 from bwt import bwt  # Assuming rle is another module you have
+from huffman import huffman
 
 class tiny_compress:
     def __init__(self):
@@ -28,7 +29,7 @@ class tiny_compress:
         self.log_bytes(data, "Input Data")
 
         bwt_encoded = bwt.encode(data)
-        self.log_bytes(bwt_encoded, "After BWT", original_size)
+        self.log_bytes(bwt_encoded, "After BWT")
 
         mtf_encoded = mtf.encode(bwt_encoded)
         self.log_bytes(mtf_encoded, "After MTF", original_size)
@@ -36,12 +37,17 @@ class tiny_compress:
         rel_encoded = rle.encode(mtf_encoded)
         self.log_bytes(rel_encoded, "After RLE", original_size)
 
-        compressed_size = len(rel_encoded)
+        # huffman_coded = huffman.encode(rel_encoded)
+        # self.log_bytes(rel_encoded, "After Huffman", original_size)
+
+        huffman_coded = rel_encoded
+
+        compressed_size = len(huffman_coded)
         compression_ratio = compressed_size / original_size
         self.logger.info(f"Compression ratio: {compression_ratio:.2f}")
         print(f"Compression ratio: {compression_ratio:.2f}")  # Output to console
 
-        return rel_encoded
+        return huffman_coded
 
     def decompress(self, data: bytes) -> bytes:
         self.logger.info("\nDECOMPRESSION PROCESS")
@@ -49,7 +55,11 @@ class tiny_compress:
 
         self.log_bytes(data, "Input Compressed Data")
 
-        rel_decoded = rle.decode(data)
+        # huffman_decoded = huffman.decode(data)
+
+        huffman_decoded = data
+
+        rel_decoded = rle.decode(huffman_decoded)
         self.log_bytes(rel_decoded, "After RLE Decode")
 
         mtf_decoded = mtf.decode(rel_decoded)

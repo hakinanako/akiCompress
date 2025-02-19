@@ -1,60 +1,66 @@
 class rle:
+    MAX_COUNT = 255  # Maximum run length for a single byte
+
     @staticmethod
     def encode(data: bytes) -> bytes:
-        if not data:
-            return b""
+        encoded = []
+        count = 1
 
-        encoded = bytearray()
-        i = 0
-        n = len(data)
-
-        while i < n:
-            # 搜索连续相同字节的结束位置
-            run_start = i
-            run_byte = data[i]
-            while i < n and data[i] == run_byte and i - run_start < 255:
-                i += 1
-            run_length = i - run_start
-
-            # 重复次数少于3，直接存储原字节
-            if run_length < 3:
-                encoded.append(0)  # 标记为未压缩块
-                encoded.append(run_length)  # 未压缩块长度
-                encoded.extend(data[run_start:i])
+        # Iterate through the data starting from the second byte
+        for i in range(1, len(data)):
+            # If current byte is the same as previous byte, increment the count
+            if data[i] == data[i - 1]:
+                count += 1
             else:
-                encoded.append(255)  # 标记为压缩块
-                encoded.append(run_length)
-                encoded.append(run_byte)
+                # Append the current byte and its count
+                while count > rle.MAX_COUNT:
+                    encoded.append(rle.MAX_COUNT)
+                    encoded.append(data[i - 1])
+                    count -= rle.MAX_COUNT
+                encoded.append(count)
+                encoded.append(data[i - 1])
+                count = 1  # Reset count for the new byte
+
+        # Don't forget to append the last byte and its count
+        while count > rle.MAX_COUNT:
+            encoded.append(rle.MAX_COUNT)
+            encoded.append(data[-1])
+            count -= rle.MAX_COUNT
+        encoded.append(count)
+        encoded.append(data[-1])
 
         return bytes(encoded)
 
     @staticmethod
     def decode(data: bytes) -> bytes:
-        if not data:
-            return b""
-
         decoded = bytearray()
-        i = 0
 
-        # 解码 对于数据不足的情况，抛出异常
-        while i < len(data):
-            block_type = data[i]
-            i += 1
-            if i >= len(data):
-                raise ValueError("RLE error")
+        # Iterate through the encoded data by steps of 2 (count and byte)
+        for i in range(0, len(data), 2):
+            count = data[i]
+            byte = data[i + 1]
 
-            length = data[i]
-            i += 1
-
-            if block_type == 255:  # 压缩块
-                if i >= len(data):
-                    raise ValueError("RLE error")
-                decoded.extend([data[i]] * length)
-                i += 1
-            else:  # 未压缩块
-                if i + length > len(data):
-                    raise ValueError("RLE error")
-                decoded.extend(data[i:i + length])
-                i += length
+            # Append the byte count times to the decoded data
+            decoded.extend([byte] * count)
 
         return bytes(decoded)
+
+
+if __name__ == '__main__':
+    # 测试
+    data = b"AAAABAAAAAAAAAAAAAAAAAAAAAAAAABBCCDAA"
+    encoded = rle.encode(data)
+    print("Encoded data:", encoded)
+
+    # 转成可读文本
+    print("Encoded data (as latin1):", encoded.decode('latin1'))
+
+    decoded = rle.decode(encoded)
+    print("Decoded data:", decoded)
+
+    # 计算压缩率
+    original_size = len(data)
+    compressed_size = len(encoded)
+    compression_ratio = compressed_size / original_size
+
+    print(f"Compression ratio: {compression_ratio:.2f}")
