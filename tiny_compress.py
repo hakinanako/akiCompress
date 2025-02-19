@@ -37,10 +37,9 @@ class tiny_compress:
         rel_encoded = rle.encode(mtf_encoded)
         self.log_bytes(rel_encoded, "After RLE", original_size)
 
-        # huffman_coded = huffman.encode(rel_encoded)
-        # self.log_bytes(rel_encoded, "After Huffman", original_size)
+        huffman_coded = huffman.encode(rel_encoded)
+        self.log_bytes(huffman_coded, "After Huffman", original_size)
 
-        huffman_coded = rel_encoded
 
         compressed_size = len(huffman_coded)
         compression_ratio = compressed_size / original_size
@@ -55,9 +54,8 @@ class tiny_compress:
 
         self.log_bytes(data, "Input Compressed Data")
 
-        # huffman_decoded = huffman.decode(data)
-
-        huffman_decoded = data
+        huffman_decoded = huffman.decode(data)
+        self.log_bytes(huffman_decoded, "After Huffman Decode")
 
         rel_decoded = rle.decode(huffman_decoded)
         self.log_bytes(rel_decoded, "After RLE Decode")
@@ -112,8 +110,8 @@ class tiny_compress:
         self.logger.info(f"Original size: {len(data)} bytes")
         self.logger.info(f"Compressed size: {len(compressed)} bytes")
 
-        # assert data == decompressed
-        # self.logger.info("Test passed! Original and decompressed data match.")
+        assert data == decompressed
+        self.logger.info("Test passed! Original and decompressed data match.")
 
     def test(self):
         self.logger.info("Starting Compression Tests")
