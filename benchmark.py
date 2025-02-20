@@ -140,9 +140,7 @@ class Benchmark:
         plt.show()
 
     def display_compression_ratios(self):
-        """
-        Display a line chart of compression ratios using matplotlib.
-        """
+
         plt.figure(figsize=(10, 6))
         plt.plot(self.data_sizes, self.compression_ratios, label="Compression Ratio", color='purple', marker='o')
         plt.xscale('log')
@@ -154,9 +152,7 @@ class Benchmark:
         plt.show()
 
     def benchmark_file(self, file_path: str):
-        """
-        Benchmark compression and decompression for a given file.
-        """
+
         with open(file_path, 'rb') as f:
             data = f.read()
 
@@ -192,9 +188,7 @@ class Benchmark:
         plt.show()
 
     def benchmark_image(self, image_path: str):
-        """
-        Benchmark compression and decompression for a given image file.
-        """
+
         with open(image_path, 'rb') as f:
             image_data = f.read()
 
@@ -209,7 +203,6 @@ class Benchmark:
         print(f"Compression Time: {compression_time:.4f} seconds")
         print(f"Decompression Time: {decompression_time:.4f} seconds")
 
-        # Create a table to display the results
         fig, ax = plt.subplots(figsize=(8, 4))
         ax.axis('tight')
         ax.axis('off')
