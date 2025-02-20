@@ -1,27 +1,23 @@
 class rle:
-    MAX_COUNT = 255  # Maximum run length for a single byte
+    MAX_COUNT = 255
 
     @staticmethod
     def encode(data: bytes) -> bytes:
         encoded = []
         count = 1
 
-        # Iterate through the data starting from the second byte
         for i in range(1, len(data)):
-            # If current byte is the same as previous byte, increment the count
             if data[i] == data[i - 1]:
                 count += 1
             else:
-                # Append the current byte and its count
                 while count > rle.MAX_COUNT:
                     encoded.append(rle.MAX_COUNT)
                     encoded.append(data[i - 1])
                     count -= rle.MAX_COUNT
                 encoded.append(count)
                 encoded.append(data[i - 1])
-                count = 1  # Reset count for the new byte
+                count = 1
 
-        # Don't forget to append the last byte and its count
         while count > rle.MAX_COUNT:
             encoded.append(rle.MAX_COUNT)
             encoded.append(data[-1])
@@ -48,7 +44,7 @@ class rle:
 
 if __name__ == '__main__':
     # 测试
-    data = b"AAAABAAAAAAAAAAAAAAAAAAAAAAAAABBCCDAA"
+    data = b"ABCD"
     encoded = rle.encode(data)
     print("Encoded data:", encoded)
 

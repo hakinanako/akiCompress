@@ -2,9 +2,9 @@ import time
 import random
 import string
 import matplotlib.pyplot as plt
-
 from tiny_compress import tiny_compress
-
+from PIL import Image
+import io
 
 class Benchmark:
     def __init__(self, compressor):
@@ -15,6 +15,7 @@ class Benchmark:
         self.decompression_times = []
         self.compression_speeds = []
         self.decompression_speeds = []
+        self.compression_ratios = []
 
     def generate_random_data(self, size: int) -> bytes:
         """
@@ -37,7 +38,7 @@ class Benchmark:
         original_size = len(data)
         compression_ratio = compressed_size / original_size
 
-        return compression_time, compressed_size
+        return compression_time, compressed_size, compression_ratio
 
     def benchmark_decompress(self, data: bytes):
         """
@@ -59,22 +60,23 @@ class Benchmark:
         data = self.generate_random_data(data_size)
 
         # Benchmark compression and decompression
-        compression_time, compressed_size = self.benchmark_compress(data)
+        compression_time, compressed_size, compression_ratio = self.benchmark_compress(data)
         compressed_data = self.compressor.compress(data)
         decompression_time = self.benchmark_decompress(compressed_data)
 
-        return compression_time, decompression_time, data_size
+        return compression_time, decompression_time, data_size, compression_ratio
 
     def run_benchmarks(self, data_sizes):
         """
         Run benchmarks for all data sizes and store the results for plotting.
         """
         for size in data_sizes:
-            compression_time, decompression_time, original_size = self.stress_test(size)
+            compression_time, decompression_time, original_size, compression_ratio = self.stress_test(size)
             # Append the results
             self.data_sizes.append(original_size)
             self.compression_times.append(compression_time)
             self.decompression_times.append(decompression_time)
+            self.compression_ratios.append(compression_ratio)
 
             # Calculate compression and decompression speeds (MB/s)
             compression_speed = (original_size / (1024 * 1024)) / compression_time if compression_time != 0 else 0
@@ -85,6 +87,7 @@ class Benchmark:
 
         # Plot the benchmark results
         self.plot_benchmarks()
+        self.display_compression_ratios()
 
     def plot_benchmarks(self):
         """
@@ -136,16 +139,107 @@ class Benchmark:
         plt.legend()
         plt.show()
 
+    def display_compression_ratios(self):
+        """
+        Display a line chart of compression ratios using matplotlib.
+        """
+        plt.figure(figsize=(10, 6))
+        plt.plot(self.data_sizes, self.compression_ratios, label="Compression Ratio", color='purple', marker='o')
+        plt.xscale('log')
+        plt.xlabel('Data Size (bytes)')
+        plt.ylabel('Compression Ratio')
+        plt.title('Compression Ratio vs Data Size')
+        plt.grid(True)
+        plt.legend()
+        plt.show()
+
+    def benchmark_file(self, file_path: str):
+        """
+        Benchmark compression and decompression for a given file.
+        """
+        with open(file_path, 'rb') as f:
+            data = f.read()
+
+        compression_time, compressed_size, compression_ratio = self.benchmark_compress(data)
+        compressed_data = self.compressor.compress(data)
+        decompression_time = self.benchmark_decompress(compressed_data)
+
+        print(f"File: {file_path}")
+        print(f"Original Size: {len(data)} bytes")
+        print(f"Compressed Size: {compressed_size} bytes")
+        print(f"Compression Ratio: {compression_ratio:.2f}")
+        print(f"Compression Time: {compression_time:.4f} seconds")
+        print(f"Decompression Time: {decompression_time:.4f} seconds")
+
+        # Create a table to display the results
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.axis('tight')
+        ax.axis('off')
+        table_data = [
+            ["Metric", "Value"],
+            ["File", file_path],
+            ["Original Size (bytes)", len(data)],
+            ["Compressed Size (bytes)", compressed_size],
+            ["Compression Ratio", f"{compression_ratio:.2f}"],
+            ["Compression Time (seconds)", f"{compression_time:.4f}"],
+            ["Decompression Time (seconds)", f"{decompression_time:.4f}"]
+        ]
+        table = ax.table(cellText=table_data, colLabels=None, cellLoc='center', loc='center')
+        table.auto_set_font_size(False)
+        table.set_fontsize(10)
+        table.scale(1.2, 1.2)
+        plt.title('Benchmark Results')
+        plt.show()
+
+    def benchmark_image(self, image_path: str):
+        """
+        Benchmark compression and decompression for a given image file.
+        """
+        with open(image_path, 'rb') as f:
+            image_data = f.read()
+
+        compression_time, compressed_size, compression_ratio = self.benchmark_compress(image_data)
+        compressed_data = self.compressor.compress(image_data)
+        decompression_time = self.benchmark_decompress(compressed_data)
+
+        print(f"Image: {image_path}")
+        print(f"Original Size: {len(image_data)} bytes")
+        print(f"Compressed Size: {compressed_size} bytes")
+        print(f"Compression Ratio: {compression_ratio:.2f}")
+        print(f"Compression Time: {compression_time:.4f} seconds")
+        print(f"Decompression Time: {decompression_time:.4f} seconds")
+
+        # Create a table to display the results
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.axis('tight')
+        ax.axis('off')
+        table_data = [
+            ["Metric", "Value"],
+            ["Image", image_path],
+            ["Original Size (bytes)", len(image_data)],
+            ["Compressed Size (bytes)", compressed_size],
+            ["Compression Ratio", f"{compression_ratio:.2f}"],
+            ["Compression Time (seconds)", f"{compression_time:.4f}"],
+            ["Decompression Time (seconds)", f"{decompression_time:.4f}"]
+        ]
+        table = ax.table(cellText=table_data, colLabels=None, cellLoc='center', loc='center')
+        table.auto_set_font_size(False)
+        table.set_fontsize(10)
+        table.scale(1.2, 1.2)
+        plt.title('Benchmark Results')
+        plt.show()
 
 if __name__ == "__main__":
-    # Create the compressor instance
     compressor = tiny_compress()
 
-    # Create the benchmark instance
     benchmark = Benchmark(compressor)
 
-    # Data sizes, powers of 2 up to 128MB
-    data_sizes = [2 ** i for i in range(1, 22)]
+    # data_sizes = [2 ** i for i in range(2, 24)]
+    #
+    # benchmark.run_benchmarks(data_sizes)
 
-    # Run benchmarks and generate plots
-    benchmark.run_benchmarks(data_sizes)
+    # Benchmark a specific file
+    # benchmark.benchmark_file('nahan.txt')
+
+    # Benchmark a specific image
+    benchmark.benchmark_image('hanser.jpg')
