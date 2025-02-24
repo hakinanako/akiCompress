@@ -227,12 +227,12 @@ if __name__ == "__main__":
 
     benchmark = Benchmark(compressor)
 
-    # data_sizes = [2 ** i for i in range(2, 24)]
+    data_sizes = [2 ** i for i in range(2, 24)]
     #
-    # benchmark.run_benchmarks(data_sizes)
+    benchmark.run_benchmarks(data_sizes)
 
     # Benchmark a specific file
     # benchmark.benchmark_file('nahan.txt')
 
     # Benchmark a specific image
-    benchmark.benchmark_image('hanser.jpg')
+    # benchmark.benchmark_image('hanser.jpg')
